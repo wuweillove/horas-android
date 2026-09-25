@@ -1888,3 +1888,25 @@ html[data-night="1"][data-palette="oxido"] {
     transition: none !important;
   }
 }
+
+@media (max-width: 960px) {
+  .hz button,
+  .hz .jobs > .job,
+  .hz .ranges .range,
+  .hz .text,
+  .hz .btn.quiet {
+    min-height: 3rem;
+  }
+
+  .hz button {
+    transition: background-color 80ms linear;
+  }
+
+  .hz button:active {
+    background-color: color-mix(in srgb, var(--carbon) 14%, transparent);
+  }
+}
+
+html.ad-banner #root .hz .card {
+  padding-bottom: calc(var(--nav) + 4.75rem + env(safe-area-inset-bottom));
+}

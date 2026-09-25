@@ -65,6 +65,10 @@ import {
 import { ClientsPanel, InvoicesPanel, SettingsPanel } from "./panels.tsx";
 import { hydrateStore, persistLocal } from "./persist.ts";
 import { clearSyncKey, loadSyncKey, queueSync, readSyncLink, sameContent, saveDesk, saveSyncKey } from "./sync.ts";
+import { App as NativeApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+import { prepareAds, setReportBanner, showTransitionAd } from "./native/ads.ts";
+import { stopClockNotification, syncClockNotification } from "./native/timer.ts";
 
 const RANGES: { key: RangeKey; label: string }[] = [
   { key: "today", label: "Today" },
@@ -250,6 +254,53 @@ export function App() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    void prepareAds();
+  }, []);
+
+  useEffect(() => {
+    void setReportBanner(view === "clients" || view === "invoices");
+  }, [view]);
+
+  useEffect(() => {
+    const running = active ?? openOther;
+    if (!running) {
+      void stopClockNotification();
+      return;
+    }
+    const name = jobNameOf(store.jobs, running.jobId) || job.name;
+    void syncClockNotification(name, formatRunning(durationMs(running, now)));
+  }, [active, openOther, job.name, store.jobs, Math.floor(now / 30000)]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const handle = NativeApp.addListener("backButton", () => {
+      const editing = document.querySelector(".row .edit");
+      if (editing) {
+        document.querySelector<HTMLButtonElement>(".row-edit")?.click();
+        return;
+      }
+      const manual = document.querySelector(".manual");
+      if (manual) {
+        manual.querySelector<HTMLButtonElement>("button.btn.quiet")?.click();
+        return;
+      }
+      const jobForm = document.querySelector(".job-form");
+      if (jobForm) {
+        jobForm.querySelector<HTMLButtonElement>("button.btn.quiet")?.click();
+        return;
+      }
+      if (view !== "time") {
+        setView("time");
+        return;
+      }
+      void NativeApp.exitApp();
+    });
+    return () => {
+      void handle.then((listener) => listener.remove());
+    };
+  }, [view]);
 
   const night = isNight(new Date(now), store.settings.nightHour);
   const palette = store.settings.palette;
@@ -608,6 +659,7 @@ export function App() {
           <InvoicesPanel
             store={store}
             onChange={applyJob}
+            onBillingMoment={() => void showTransitionAd(Boolean(active || openOther))}
             onError={(text) => {
               setUndo(null);
               setNotice({ text, kind: "error" });

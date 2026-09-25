@@ -303,7 +303,11 @@ export function ClientsPanel({ store, onChange, onError }: PanelProps) {
   );
 }
 
-export function InvoicesPanel({ store, onChange }: PanelProps) {
+export function InvoicesPanel({
+  store,
+  onChange,
+  onBillingMoment,
+}: PanelProps & { onBillingMoment?: () => void }) {
   const [clientId, setClientId] = useState(store.clients[0]?.id ?? "");
   const [picked, setPicked] = useState<string[]>([]);
   const open = unbilledEntries(store, clientId);
@@ -393,7 +397,10 @@ export function InvoicesPanel({ store, onChange }: PanelProps) {
                   className="text"
                   type="button"
                   aria-pressed={invoice.status === status}
-                  onClick={() => onChange(setInvoiceStatus(store, invoice.id, status))}
+                  onClick={() => {
+                    onChange(setInvoiceStatus(store, invoice.id, status));
+                    if ((status === "sent" || status === "paid") && invoice.status !== status) onBillingMoment?.();
+                  }}
                 >
                   {status}
                 </button>
@@ -403,7 +410,10 @@ export function InvoicesPanel({ store, onChange }: PanelProps) {
               <button
                 className="text"
                 type="button"
-                onClick={() => downloadBytes(`${invoice.number}.pdf`, renderInvoicePdf(invoice, store.settings), "application/pdf")}
+                onClick={() => {
+                  downloadBytes(`${invoice.number}.pdf`, renderInvoicePdf(invoice, store.settings), "application/pdf");
+                  onBillingMoment?.();
+                }}
               >
                 PDF
               </button>
