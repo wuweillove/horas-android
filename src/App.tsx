@@ -68,6 +68,9 @@ import { clearSyncKey, loadSyncKey, queueSync, readSyncLink, sameContent, saveDe
 import { App as NativeApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { prepareAds, setReportBanner, showTransitionAd } from "./native/ads.ts";
+import { dismissTop, useDismiss } from "./native/dismiss.ts";
+import { saveFile } from "./native/files.ts";
+import { bindPressHaptics } from "./native/haptics.ts";
 import { stopClockNotification, syncClockNotification } from "./native/timer.ts";
 
 const RANGES: { key: RangeKey; label: string }[] = [
@@ -146,13 +149,7 @@ function TimeInput({
 }
 
 function download(filename: string, content: string, mime: string) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  void saveFile(filename, content, mime);
 }
 
 function stamp(): string {
@@ -273,24 +270,20 @@ export function App() {
     void syncClockNotification(name, formatRunning(durationMs(running, now)));
   }, [active, openOther, job.name, store.jobs, Math.floor(now / 30000)]);
 
+  useEffect(() => bindPressHaptics(), []);
+
+  useDismiss(adding, () => setAdding(false));
+  useDismiss(addingJob, () => {
+    setAddingJob(false);
+    setJobName("");
+  });
+  useDismiss(renaming, () => setRenaming(false));
+  useDismiss(confirmingJob, () => setConfirmingJob(false));
+
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const handle = NativeApp.addListener("backButton", () => {
-      const editing = document.querySelector(".row .edit");
-      if (editing) {
-        document.querySelector<HTMLButtonElement>(".row-edit")?.click();
-        return;
-      }
-      const manual = document.querySelector(".manual");
-      if (manual) {
-        manual.querySelector<HTMLButtonElement>("button.btn.quiet")?.click();
-        return;
-      }
-      const jobForm = document.querySelector(".job-form");
-      if (jobForm) {
-        jobForm.querySelector<HTMLButtonElement>("button.btn.quiet")?.click();
-        return;
-      }
+      if (dismissTop()) return;
       if (view !== "time") {
         setView("time");
         return;
@@ -1123,6 +1116,8 @@ function ManualForm({
     first.current?.focus();
   }, []);
 
+  useDismiss(true, onCancel);
+
   useEffect(() => {
     function onKey(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") onCancel();
@@ -1201,6 +1196,11 @@ function EntryRow({
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  useDismiss(editing, () => {
+    setConfirming(false);
+    setEditing(false);
+  });
+  useDismiss(confirming, () => setConfirming(false));
   const [date, setDate] = useState(() => toDateValue(entry.clockIn));
   const [start, setStart] = useState(() => toTimeValue(entry.clockIn));
   const [end, setEnd] = useState(() => (entry.clockOut === null ? "" : toTimeValue(entry.clockOut)));

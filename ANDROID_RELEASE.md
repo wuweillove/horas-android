@@ -28,7 +28,7 @@ keytool -genkeypair -v \
 
 Put `horas-release.jks` somewhere outside the project, for example `~/keystores/horas-release.jks`.
 
-Add this to `android/keystore.properties` (do not commit it):
+Add this to `android/keystore.properties` (that file is gitignored; do not commit it):
 
 ```properties
 storeFile=/absolute/path/horas-release.jks
@@ -37,26 +37,7 @@ keyAlias=horas
 keyPassword=REPLACE
 ```
 
-Then, in `android/app/build.gradle`, inside `android { }`, add:
-
-```gradle
-def keystorePropertiesFile = rootProject.file("keystore.properties")
-def keystoreProperties = new Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    signingConfigs {
-        release {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-        }
-    }
-    buildTypes.release.signingConfig signingConfigs.release
-}
-```
-
-Release builds already enable R8 (`minifyEnabled` and `shrinkResources`).
+`android/app/build.gradle` already reads that file and signs the release build with it. Release builds enable R8 (`minifyEnabled` and `shrinkResources`).
 
 ## App bundle
 
@@ -72,11 +53,11 @@ The bundle is `android/app/build/outputs/bundle/release/app-release.aab`. Upload
 Debug and CI use Google's test ids. For production:
 
 1. Create an app in AdMob and a GDPR message in Privacy & messaging (UMP).
-2. Set `admob.app.id` in `android/local.properties` to the AdMob **app** id (`ca-app-pub-…~-…`).
+2. Set `admob.app.id` in `android/local.properties` to the AdMob **app** id (`ca-app-pub-…~…`).
 3. Set `VITE_ADMOB_BANNER_ID` and `VITE_ADMOB_INTERSTITIAL_ID` in `.env` to the production **unit** ids, then run `npm run cap:sync` again.
 
 The banner is an adaptive banner on Clients and Invoices, above the navigation. The interstitial runs after a PDF export or when an invoice becomes sent or paid, and it is skipped while a clock is running. UMP consent is requested before any ad load.
 
 ## Foreground clock
 
-While a clock is running, `TimerService` is a special-use foreground service with a low-importance notification. Play Console will ask you to declare that special-use type and to justify it: the notification shows the job and elapsed time so the clock is not frozen in the background. The only runtime permission Horas asks for is notifications. The Google Mobile Ads SDK also merges advertising-id, network-state, and wake-lock permissions.
+While a clock is running, `TimerService` is a special-use foreground service with a low-importance notification. Play Console will ask you to declare that special-use type and to justify it: the notification shows the job and elapsed time so the clock is not frozen in the background. The only runtime permission is notifications.

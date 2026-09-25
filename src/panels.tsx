@@ -14,20 +14,12 @@ import {
   type Store,
   type WeekStart,
 } from "./model.ts";
+import { useDismiss } from "./native/dismiss.ts";
+import { saveFile } from "./native/files.ts";
 import { renderInvoicePdf } from "./pdf.ts";
 
-function blobBytes(bytes: Uint8Array): ArrayBuffer {
-  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-}
-
 function downloadBytes(filename: string, bytes: Uint8Array, mime: string) {
-  const blob = new Blob([blobBytes(bytes)], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  void saveFile(filename, bytes, mime);
 }
 
 type DeskChange = Store | { ok: false; error: string };
@@ -187,6 +179,13 @@ export function ClientsPanel({ store, onChange, onError }: PanelProps) {
   const [address, setAddress] = useState("");
   const [rate, setRate] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
+  useDismiss(editing !== null, () => {
+    setEditing(null);
+    setName("");
+    setEmail("");
+    setAddress("");
+    setRate("");
+  });
 
   function readRate(): number | undefined {
     if (rate.trim() === "") return 0;

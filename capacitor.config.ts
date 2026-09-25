@@ -1,5 +1,10 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
+/**
+ * Application id for the Play listing. Change this before you publish
+ * if com.horas.app is already taken. It must match applicationId in
+ * android/app/build.gradle.
+ */
 const config: CapacitorConfig = {
   appId: "com.horas.app",
   appName: "Horas",
@@ -11,11 +16,7 @@ const config: CapacitorConfig = {
   },
   server: {
     androidScheme: "https",
-  },
-  plugins: {
-    AdMob: {
-      appId: "ca-app-pub-3940256099942544~3347511713",
-    },
+    hostname: "pepitoloco.zo.space",
   },
 };
 

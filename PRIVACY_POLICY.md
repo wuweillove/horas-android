@@ -48,4 +48,4 @@ Horas is a work tool. It is not directed at children under 13.
 
 ## Contact
 
-Replace this line with the publisher contact address before you submit the Play listing.
+The publisher is [wuweillove](https://github.com/wuweillove). The desk itself is served from https://pepitoloco.zo.space.
