@@ -6,7 +6,7 @@ Horas is a freelancer time desk. This policy covers the Android app distributed 
 
 Hours, breaks, comments, jobs, clients, rates, invoice drafts, and settings stay on the phone. They are written to the app's private storage (web storage inside the app sandbox). They are not uploaded by Horas itself.
 
-If you sign in with Google, the app receives your Google account id, name, and email, and uses them only to derive a desk id so two of your devices can share one encrypted copy of that desk. The hours payload is encrypted on the device before it is sent. Horas does not receive your Google password.
+If you sign in with Google, the app receives your Google account id, name, and email and keeps them on the device. Horas does not receive your Google password, and it does not upload your hours.
 
 A backup file is created only when you tap Download backup. Restoring a backup reads a file you choose.
 
@@ -30,7 +30,7 @@ Google's own description of what AdMob collects is at https://policies.google.co
 
 Declared by Horas:
 
-- Internet: to load ads, the consent form, and an optional encrypted desk sync
+- Internet: to load ads, the consent form, to reach Google sign-in and ads
 - Notifications: to show a persistent notification while a clock is running
 - Foreground service (`specialUse`): so Android does not freeze that clock when you leave the app
 
@@ -48,4 +48,4 @@ Horas is a work tool. It is not directed at children under 13.
 
 ## Contact
 
-The publisher is [wuweillove](https://github.com/wuweillove). This policy is published at https://pepitoloco.zo.space/horas-privacy.
+The publisher is [wuweillove](https://github.com/wuweillove). This policy is published at https://horas-gamma.vercel.app/horas-privacy.

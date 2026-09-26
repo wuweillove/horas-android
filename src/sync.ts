@@ -1,7 +1,7 @@
 import { durableMerge, normalizeStore, normalizeVaultId, stampStore, type Store } from "./model.ts";
 
 const KEY_STORAGE = "horas.syncKey";
-export const SYNC_URL = "https://pepitoloco.zo.space/api/horas-sync";
+export const SYNC_URL = "";
 
 type Sealed = { iv: string; ct: string };
 
@@ -108,6 +108,7 @@ export async function openStore(blob: Sealed, key: string): Promise<Store | null
 type Pull = { ok: true; rev: number; store: Store | null } | { ok: false };
 
 export async function pullDesk(desk: string, key: string): Promise<Pull> {
+  if (!syncUrl()) return { ok: true, rev: 0, store: null };
   const id = normalizeVaultId(desk);
   if (!id) return { ok: false };
   let response: Response;
@@ -145,6 +146,7 @@ export function saveDesk(desk: string, key: string, local: Store): Promise<{ ok:
 async function saveDeskOnce(desk: string, key: string, local: Store): Promise<{ ok: true; store: Store } | { ok: false }> {
   const id = normalizeVaultId(desk);
   if (!id || !decodeKey(key)) return { ok: false };
+  if (!syncUrl()) return { ok: true, store: { ...local, vaultId: id } };
   let current = { ...local, vaultId: id };
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const pulled = await pullDesk(id, key);

@@ -1,6 +1,6 @@
 # Play listing
 
-Privacy policy URL: https://pepitoloco.zo.space/horas-privacy
+Privacy policy URL: https://horas-gamma.vercel.app/horas-privacy
 
 App name: Horas
 

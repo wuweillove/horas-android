@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
   },
   server: {
     androidScheme: "https",
-    hostname: "pepitoloco.zo.space",
+    hostname: "horas-gamma.vercel.app",
   },
 };
 
